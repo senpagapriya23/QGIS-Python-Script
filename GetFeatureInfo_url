@@ -1,14 +1,14 @@
 import qgis
-from qgis.core import QgsApplication,QgsVectorLayer
-from qgis.analysis import QgsNativeAlgorithms
 import sys 
+from qgis.core import QgsApplication,QgsVectorLayer,QgsDxfExport,QgsCoordinateReferenceSystem
 import processing
 from processing.core.Processing import Processing
+import PyQt5.QtWidgets
+from  PyQt5.QtCore import QFile
 
 QgsApplication.setPrefixPath("C:/OSGeo4W/apps/qgis", True)
-qgs = QgsApplication([], True)
+qgs = QgsApplication([], False)
 qgs.initQgis()
-print(qgs)
 sys.path.append('C:/OSGeo4W/apps/qgis/python/plugins')
 
 def get_feature_from_bbox(WMS_URL, bbox, CRS, height, width, layer_name):
@@ -22,16 +22,33 @@ def get_feature_from_bbox(WMS_URL, bbox, CRS, height, width, layer_name):
                         listLayers.append(vlayer)
 #     print(listLayers)
     Processing.initialize()
+### merge all shapefile(vector) 
     Processing.runAlgorithm("qgis:mergevectorlayers", 
                                 {'LAYERS':listLayers,
                                 'CRS':CRS,
                                 'OUTPUT':"E:/dxf/merge.shp"})
-
+### filter duplicates
     processing.run("qgis:removeduplicatesbyattribute",
                                {'INPUT':"E:/dxf/merge.shp",
                                 'FIELDS':"fid",
                                 'CRS':CRS,
                                 'OUTPUT':"E:/dxf/filter.shp"})
+    ### vector to dxf                           
+    dxfExport = QgsDxfExport()
+    filter_layer = "E:/dxf/filter_py.shp"
+    flayer = QgsVectorLayer(filter_layer,"flayer","ogr")  
+    lyr_names = [QgsDxfExport.DxfLayer(flayer)]
+    #dxfExport.addLayers([QgsDxfExport.DxfLayer(lyr) for lyr in lyr_names])
+    #dxfExport.setMapSettings( settings )
+    dxfExport.addLayers( lyr_names )
+    dxfExport.setSymbologyScale(1000000)
+    dxfExport.setSymbologyExport(1)
+    dxfExport.setLayerTitleAsName(-1)
+    dxfExport.setDestinationCrs(QgsCoordinateReferenceSystem("EPSG:4326-WGS84"))
+    dxfExport.setForce2d(0)
+    #dxfExport.setExtent(extent)
+    dxfFile = QFile('E:\\dxf\\dxf_test.dxf')
+    dxfExport.writeToFile( dxfFile, 'utf-8' )
 
 
 listLayers=[]
