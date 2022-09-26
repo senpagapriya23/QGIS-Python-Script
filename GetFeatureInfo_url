@@ -28,7 +28,7 @@ def get_feature_from_bbox(WMS_URL, bbox, CRS, height, width, layer_name):
                                 'CRS':CRS,
                                 'OUTPUT':"E:/dxf/merge.shp"})
 ### filter duplicates
-    processing.run("qgis:removeduplicatesbyattribute",
+    Processing.runAlgorithm("qgis:removeduplicatesbyattribute",
                                {'INPUT':"E:/dxf/merge.shp",
                                 'FIELDS':"fid",
                                 'CRS':CRS,
