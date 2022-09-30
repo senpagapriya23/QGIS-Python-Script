@@ -28,12 +28,11 @@ def get_feature_from_bbox(WMS_URL, bbox, CRS, height, width, layer_name):
                                 'CRS':CRS,
                                 'OUTPUT':"E:/dxf/merge.shp"})
 ### filter duplicates
-    Processing.runAlgorithm("qgis:removeduplicatesbyattribute",
-                               {'INPUT':"E:/dxf/merge.shp",
-                                'FIELDS':"fid",
-                                'CRS':CRS,
-                                'OUTPUT':"E:/dxf/filter.shp"})
-    ### vector to dxf                           
+    Processing.runAlgorithm('qgis:deleteduplicategeometries', 
+                            {'INPUT':'E:\\dxf\\merge.shp',
+                             'OUTPUT':'E:\\dxf\\filter.shp'})
+                             
+### vector to dxf                           
     dxfExport = QgsDxfExport()
     filter_layer = "E:/dxf/filter_py.shp"
     flayer = QgsVectorLayer(filter_layer,"flayer","ogr")  
@@ -44,7 +43,7 @@ def get_feature_from_bbox(WMS_URL, bbox, CRS, height, width, layer_name):
     dxfExport.setSymbologyScale(1000000)
     dxfExport.setSymbologyExport(1)
     dxfExport.setLayerTitleAsName(-1)
-    dxfExport.setDestinationCrs(QgsCoordinateReferenceSystem("EPSG:4326-WGS84"))
+    dxfExport.setDestinationCrs(QgsCoordinateReferenceSystem(CRS))
     dxfExport.setForce2d(0)
     #dxfExport.setExtent(extent)
     dxfFile = QFile('E:\\dxf\\dxf_test.dxf')
@@ -52,6 +51,8 @@ def get_feature_from_bbox(WMS_URL, bbox, CRS, height, width, layer_name):
 
 
 listLayers=[]
-featureCollection = get_feature_from_bbox("https://e8b2-213-136-49-186.eu.ngrok.io/geoserver/ockero/wms?service=WMS", "57.70547630632324854,11.64482801766406439,57.72092663615548247,11.65861925167538615",
-                     "EPSG:4326","400","167","fiber")
+featureCollection = get_feature_from_bbox("https://ahocevar.com/geoserver/topp/wms?SERVICE=WMS", "35.5968085476640255,-103.9599749088570491,38.8013780976640277,-96.0064649413871507",
+                     "EPSG:4326","400","167","states") 
+#                   get_feature_from_bbox("https://e8b2-213-136-49-186.eu.ngrok.io/geoserver/ockero/wms?service=WMS", "57.70547630632324854,11.64482801766406439,57.72092663615548247,11.65861925167538615",
+#                     "EPSG:4326","400","167","fiber")
 qgs.exitQgis()
